@@ -3476,7 +3476,6 @@ HORDE.max_max_waves = 250
 HORDE.max_waves = math.min(HORDE.max_max_waves, math.max(1, GetConVarNumber("horde_max_wave")))
 
 CONFIG.Settings = {
-    MAX_WAVES = 1,  -- Maximum number of waves to generate
     MUTATIONS = {"charged", "decay", "eternal", "flicker", "frenzy", "fume", "glass", "nemesis", "nemesis_v2", "puncture", "regenerator", "shadow", "shielding", "shockproof", "singe", "wall"},  -- List of mutations to use with enemies
     SCALE_CAPS = {
         -- Configuration for scaling caps (0 = uncapped)
