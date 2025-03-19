@@ -1,0 +1,6 @@
+"AddonInfo"
+{
+	"name" "[HORDE] Nazi Zombies - ARC9 | A Proper Horde Config"
+	"author_name" "The Fantastic Loki"
+	"info" "{"title":"[HORDE] Nazi Zombies - ARC9 | A Proper Horde Config","type":"gamemode","tags":["fun","realism","COD","Zombies", "ARC9", "Zombie Hunt"],"ignore":[]}"
+}
