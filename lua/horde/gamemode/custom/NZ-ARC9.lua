@@ -3910,29 +3910,57 @@ CONFIG.Settings = {
             return scaling
         end
 
+        local function getWaveWeightMultiplier(current_wave, min_wave, enemy_type)
+            if current_wave < min_wave then return 0 end
+            
+            local waves_active = current_wave - min_wave
+            local base_mult = math.min(1, waves_active / 3) -- Takes 3 waves to reach full weight
+        
+            -- Adjust multiplier based on enemy type
+            if enemy_type == "walker" then
+                return 1 -- Walkers always have full weight
+            elseif enemy_type == "runner" then
+                -- Runners start at 20% weight and gradually increase
+                return math.min(1, 0.2 + (waves_active * 0.15))
+            elseif enemy_type == "elite" then
+                -- Elites start at 10% weight and gradually increase
+                return math.min(0.8, 0.1 + (waves_active * 0.1))
+            end
+        
+            return base_mult
+        end
+
     -- Generate enemies for a specific wave
-        local function generateWaveEnemies(wave, enemyList)
+        local function generateWaveEnemies(wave, enemyList, enemy_type)
             local enemies = {}
             local base_scaling = getWaveScaling(wave)
-
+        
             for class, props in pairs(enemyList) do
                 -- Check if enemy should appear in this wave
                 local min_wave = props.min_wave or 0
                 local max_wave = props.max_wave or 0
-
+            
                 if (min_wave == 0 or wave >= min_wave) and 
                    (max_wave == 0 or wave <= max_wave) then
+                
+                    -- Calculate wave-based weight multiplier
+                    local wave_weight_mult = getWaveWeightMultiplier(wave, min_wave, enemy_type)
 
-                    local variant_weight = props.base_weight / props.variants
-
+                    -- Base variant gets higher weight than other variants
+                    local base_variant_weight = props.base_weight * 0.4 -- 40% of weight goes to base variant
+                    local other_variant_weight = (props.base_weight * 0.6) / (props.variants - 1) -- Rest split among other variants
+                
                     for variant = 1, props.variants do
                         local variant_mults = generateVariantMultipliers(wave)
                         local key = string.format("%s_v%d_%d", class, variant, wave)
+                    
+                        -- Assign weight based on variant number
+                        local variant_weight = (variant == 1) and base_variant_weight or other_variant_weight
 
                         enemies[key] = {
                             name = key,
                             class = class,
-                            weight = variant_weight,
+                            weight = variant_weight * wave_weight_mult,
                             wave = wave,
                             is_elite = false,
                             health_scale = props.base_health * base_scaling.health * variant_mults.health,
@@ -3945,7 +3973,7 @@ CONFIG.Settings = {
                     end
                 end
             end
-
+        
             return enemies
         end
 
@@ -3997,27 +4025,27 @@ CONFIG.Settings = {
 
             -- Generate enemies for each wave
             for wave = 1, HORDE.max_waves do
-                -- Add walkers
-                local walkEnemies = generateWaveEnemies(wave, CONFIG.Settings.ENEMY_TYPES.WALKER)
+                -- Add walkers with "walker" type
+                local walkEnemies = generateWaveEnemies(wave, CONFIG.Settings.ENEMY_TYPES.WALKER, "walker")
                 for k, v in pairs(walkEnemies) do
                     config[k] = v
                 end
-
-                -- Add runners (starting from their minimum waves)
-                local runEnemies = generateWaveEnemies(wave, CONFIG.Settings.ENEMY_TYPES.RUNNER)
+            
+                -- Add runners with "runner" type
+                local runEnemies = generateWaveEnemies(wave, CONFIG.Settings.ENEMY_TYPES.RUNNER, "runner")
                 for k, v in pairs(runEnemies) do
                     config[k] = v
                 end
-
-                -- Add elites
-                local eliteEnemies = generateWaveEnemies(wave, elitePool)
+            
+                -- Add elites with "elite" type
+                local eliteEnemies = generateWaveEnemies(wave, elitePool, "elite")
                 for k, v in pairs(eliteEnemies) do
                     config[k] = v
                 end
-
-                -- Add bosses (if defined and wave matches)
+            
+                -- Add bosses
                 if CONFIG.Settings.ENEMY_TYPES.BOSS then
-                    local bossEnemies = generateWaveEnemies(wave, CONFIG.Settings.ENEMY_TYPES.BOSS)
+                    local bossEnemies = generateWaveEnemies(wave, CONFIG.Settings.ENEMY_TYPES.BOSS, "boss")
                     for k, v in pairs(bossEnemies) do
                         config[k] = v
                     end
