@@ -3,6 +3,8 @@
 A Proper [Horde](https://steamcommunity.com/workshop/filedetails/?id=2401598805) Config for [ARC9](https://steamcommunity.com/workshop/filedetails/?id=2910505837)
 
 ---
+NOTE: Project has been on hold as problems with dependancy mods were causing major performance hits, upon initial investigation I came to the conclusion that to fix said issues I would have to make pretty sweeping changes to codebases that I do not control. Further investigation has not been made as GMod stopped working entirely for me recently, likely due to my transisition to linux.
+---
 
 ## Credits:
 
